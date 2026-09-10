@@ -11,9 +11,10 @@
     "lint": "oxlint",
     "build:pool": "node scripts/build-pool.mjs",
     "shots": "node scripts/shots.mjs",
-    "predev": "node scripts/build-pool.mjs",
-    "prebuild": "node scripts/build-pool.mjs",
-    "pretest": "node scripts/build-pool.mjs"
+    "predev": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",
+    "prebuild": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",
+    "pretest": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",
+    "build:sil": "node scripts/build-silhouettes.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",

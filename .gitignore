@@ -4,3 +4,7 @@ dist
 .DS_Store
 shots/
 public/data/pool.json
+public/data/silhouettes.json
+tools/silhouettes/raw/
+tools/silhouettes/out/
+designs/

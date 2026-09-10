@@ -4,6 +4,7 @@ import { createPlatform, mockPlatform, type Platform } from './platform'
 import { Home } from './ui/Home'
 import { PlayScreen } from './ui/PlayScreen'
 import { Summary } from './ui/Summary'
+import { registerSilhouettes } from './ui/Silhouette'
 
 type Screen = 'home' | 'play' | 'summary'
 
@@ -33,7 +34,10 @@ export default function App() {
 
   // boot: pool + platform + saved meta
   useEffect(() => {
-    fetch('./data/pool.json').then(r => r.json()).then(setPool)
+    Promise.all([
+      fetch('./data/pool.json').then(r => r.json()),
+      fetch('./data/silhouettes.json').then(r => r.ok ? r.json() : {}).catch(() => ({})),
+    ]).then(([p, lib]) => { registerSilhouettes(lib); setPool(p) })
     createPlatform().then(p => { setPlatform(p); setMeta(p.getData<Meta>(META_KEY) ?? defaultMeta()) })
   }, [])
   const saveMeta = useCallback((m: Meta) => { setMeta(m); platform.setData(META_KEY, m) }, [platform])

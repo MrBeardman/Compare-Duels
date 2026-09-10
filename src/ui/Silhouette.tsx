@@ -1,11 +1,17 @@
 import type { SizeObject } from '../core'
 
 /**
- * Placeholder silhouettes until the real library exists. Original, generic shapes chosen by
- * category + measured axis. Each shape declares its intrinsic aspect (w/h) so the renderer can
- * size the measured axis exactly and let the other follow.
+ * Silhouettes. Real shapes come from public/data/silhouettes.json (built from tools/silhouettes/lib);
+ * anything without one falls back to a generic placeholder chosen by category + measured axis.
+ * Every shape declares its intrinsic aspect (w/h) so the renderer can size the measured axis
+ * exactly and let the other follow.
  */
-type Shape = { aspect: number; path: string; box: [number, number] }
+export type Shape = { aspect: number; path: string; box: [number, number]; real?: boolean }
+
+let LIB: Record<string, { w: number; h: number; d: string }> = {}
+/** Called once at boot with the manifest; objects whose id has an entry render the real outline. */
+export function registerSilhouettes(lib: Record<string, { w: number; h: number; d: string }>) { LIB = lib }
+export function hasRealSilhouette(id: string) { return id in LIB }
 
 const SHAPES: Record<string, Shape> = {
   // wide four-legged body, side view (100 × 62)
@@ -25,6 +31,8 @@ const SHAPES: Record<string, Shape> = {
 }
 
 export function shapeFor(o: SizeObject): Shape {
+  const real = LIB[o.silhouette ?? o.id]
+  if (real) return { aspect: real.w / real.h, box: [real.w, real.h], path: real.d, real: true }
   const sub = o.subcategory
   if (o.category === 'animals') {
     if (/bird/.test(sub)) return o.axis === 'width' ? SHAPES.wings : SHAPES.tall
@@ -49,7 +57,7 @@ export function Silhouette({ obj, w, h, color, fillOpacity = 0.2, dashed = false
   const s = shapeFor(obj)
   return (
     <svg width={w} height={h} viewBox={`0 0 ${s.box[0]} ${s.box[1]}`} preserveAspectRatio="none" style={{ display: 'block', overflow: 'visible' }}>
-      <path d={s.path} fill={color} fillOpacity={dashed ? 0 : fillOpacity} stroke={color}
+      <path d={s.path} fill={color} fillOpacity={dashed ? 0 : fillOpacity} stroke={color} fillRule="evenodd"
         strokeWidth={strokeWidth} strokeDasharray={dashed ? '6 5' : undefined} strokeOpacity={dashed ? 0.55 : 1}
         strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
