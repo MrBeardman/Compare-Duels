@@ -14,7 +14,7 @@ export function Home({ category, onCategory, onPlay, onDaily, dailyStreak, bestA
   return (
     <div className="h-full flex flex-col px-5 pt-8 pb-6 gap-6 max-w-[520px] mx-auto w-full">
       <div className="text-center">
-        <div className="text-[40px] leading-none font-bold tracking-tight">SIZEGAME</div>
+        <div className="text-[40px] leading-none font-bold tracking-tight">COMPARE DUELS</div>
         <div className="text-muted mt-2">How big is it, really?</div>
       </div>
 

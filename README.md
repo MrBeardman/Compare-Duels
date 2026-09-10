@@ -1,4 +1,4 @@
-# SIZEGAME (working title)
+# Compare Duels (working title)
 
 A size-estimation web game. Each round shows a **reference** silhouette (blue, drawn at true scale, size shown) and a **target** (red, random scale, size hidden). Resize the target until it looks right, lock in before the timer runs out, and see how close you were. Three big misses end the run.
 
