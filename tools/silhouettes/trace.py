@@ -33,6 +33,37 @@ clean = np.zeros_like(mask)
 ys, xs = zip(*best); clean[list(ys), list(xs)] = True
 y0, y1, x0, x1 = min(ys), max(ys) + 1, min(xs), max(xs) + 1
 crop = clean[y0:y1, x0:x1]
+
+# Shadow trim: generated renders often leave a thin contact shadow under the object. In the bottom
+# band, clip each row to the horizontal span of the object just above the band, then drop bottom
+# rows that got much narrower than that span (the shadow's own thickness).
+ch0 = crop.shape[0]; band = max(3, int(ch0 * 0.08)); refy = ch0 - band - 1
+# 1) intensity: a contact shadow is lighter than the object. In the bottom band keep only pixels
+#    about as dark as the object's own body (median of the middle rows + margin).
+gc = g[y0:y1, x0:x1]
+body = gc[int(ch0 * 0.3):int(ch0 * 0.7)][crop[int(ch0 * 0.3):int(ch0 * 0.7)]]
+if len(body):
+    dark = np.median(body) + 25
+    crop[refy + 1:] &= gc[refy + 1:] < dark
+# 2) geometry: the span may widen by at most 1 px per row below the band start.
+cols = np.where(crop[refy])[0]
+if len(cols):
+    lo, hi = int(cols.min()), int(cols.max())
+    # walking down, the span may widen by at most 1 px per row: a sudden flare is shadow, not object
+    for y in range(refy + 1, ch0):
+        rc = np.where(crop[y])[0]
+        if not len(rc): break
+        lo, hi = max(lo - 1, int(rc.min())), min(hi + 1, int(rc.max()))
+        crop[y, :lo] = False; crop[y, hi + 1:] = False
+        rc = np.where(crop[y])[0]
+        if not len(rc): break
+        lo, hi = int(rc.min()), int(rc.max())  # track the actual span so the allowance never accumulates
+    # drop the shadow's own thin rows under the object: bottom rows much emptier than the ones above
+    for y in range(ch0 - 1, refy, -1):
+        if crop[y].sum() < 0.6 * crop[y - 3].sum(): crop[y] = False
+        else: break
+    ys2 = np.where(crop.any(axis=1))[0]; xs2 = np.where(crop.any(axis=0))[0]
+    crop = crop[ys2.min():ys2.max() + 1, xs2.min():xs2.max() + 1]
 ch, cw = crop.shape
 
 # trace: potrace wants 1 = black
