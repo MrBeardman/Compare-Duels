@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+/* ── Field Kit design tokens (from the Claude Design style sheet) ───────────── */
+:root {
+  --paper: #f6f1e2;
+  --paper-2: #fbf8ef;
+  --ink: #1f5c7a;
+  --coral: #ff6b3d;
+  --amber: #e8a330;
+  --teal: #2a8c8c;
+  --text: #1a1a1a;
+  --muted: #6b6b6b;
+  --grid-line: rgb(42 140 140 / 0.18);
+  --ground: rgb(31 92 122 / 0.35);
+  --card-border: rgb(31 92 122 / 0.1);
+  --ref: var(--ink);
+  --target: var(--coral);
+  --font-ui: "Quicksand", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+[data-theme="dark"] {
+  --paper: #141b26;
+  --paper-2: #1b2431;
+  --ink: #4fb8e8;
+  --coral: #e5483c;
+  --amber: #e8b24d;
+  --teal: #3aa6a6;
+  --text: #eef2f6;
+  --muted: #9aa6b4;
+  --grid-line: rgb(79 184 232 / 0.14);
+  --ground: rgb(79 184 232 / 0.35);
+  --card-border: rgb(79 184 232 / 0.12);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-coral: var(--coral);
+  --color-amber: var(--amber);
+  --color-teal: var(--teal);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+  --radius-card: 16px;
+  --radius-btn: 12px;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+.mono { font-family: var(--font-mono); }
+
+/* Square grid map */
+.grid-map {
+  background-color: var(--paper-2);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Stickers: rounded stamps with a slight tilt */
+.sticker {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--text);
+  font-weight: 700;
+  font-size: 14px;
+  transform: rotate(-2deg);
+}
+
+.btn { border-radius: var(--radius-btn); font-weight: 700; font-size: 16px; padding: 14px 20px; }
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-accent { background: var(--coral); color: #fff; }
+.btn-ghost { background: transparent; color: var(--ink); border: 2px solid var(--ink); }
+.btn:disabled { opacity: 0.45; }
+
+.card {
+  background: var(--paper-2);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+}
