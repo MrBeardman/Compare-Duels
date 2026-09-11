@@ -3,6 +3,7 @@ import type { Run } from '../core'
 import { BAND_LABEL, CATEGORIES } from '../core'
 import { Silhouette, pixelBox } from './Silhouette'
 import { formatSize, formatPoints } from './format'
+import { CAMERA, fillFraction, gridCellPx, zoomAdjust } from './camera'
 
 const BAND_STYLE: Record<string, string> = {
   bullseye: 'bg-teal text-white border-text', close: 'bg-amber text-text', notbad: 'bg-paper-2 text-text',
@@ -46,15 +47,55 @@ export function PlayScreen({ run, onLock, onNext, showHint, onHintDone }: Props)
     ro.observe(el); return () => ro.disconnect()
   }, [])
 
-  // Reference pixel size is a function of the grid only: the renderer always reserves room for maxRatio.
-  const refPx = useMemo(() => Math.min(grid.h * 0.52, grid.w * 0.9) / (cfg.maxRatio * 1.1), [grid, cfg.maxRatio])
   // Portrait: ground line sits above the reveal-card zone so the silhouettes stay visible with the card open.
   const portrait = grid.h > grid.w
   const groundY = portrait ? grid.h * 0.56 : grid.h * 0.82
+  const space = useMemo(() => ({ availH: groundY - 28, maxW: grid.w * 0.56, pairW: grid.w * 0.8 }), [groundY, grid.w])
 
   const [ratio, setRatio] = useState(pair.startRatio)
-  useEffect(() => { setRatio(pair.startRatio) }, [pair])
   const clamp = (r: number) => Math.min(cfg.maxRatio, Math.max(cfg.minRatio, r))
+
+  // ── adaptive camera ──
+  // base scale: reference at 1 unit = a comfortable mid size; `zoom` multiplies it and is driven only by
+  // what is displayed (reference + current guess, + true outline after reveal). See camera.ts.
+  const basePx = Math.max(CAMERA.minRefPx, Math.min(space.availH * 0.45, grid.w * 0.28))
+  const [zoom, setZoom] = useState(1)
+  const zoomRef = useRef(1); zoomRef.current = zoom
+  const zoomTarget = useRef(1)
+  const fitNow = (r: number, includeTruth: boolean) => {
+    const refB = pixelBox(pair.reference, basePx)
+    const others = [pixelBox(pair.target, basePx * r)]
+    if (includeTruth) others.push(pixelBox(pair.target, basePx * pair.ratio))
+    return CAMERA.comfort / fillFraction(refB, others, space)
+  }
+  // new round: snap the camera to a fit of the START state (random, uncorrelated with the answer)
+  useEffect(() => {
+    setRatio(pair.startRatio)
+    const z = Math.max(CAMERA.minRefPx / basePx, fitNow(pair.startRatio, false))
+    zoomTarget.current = z; zoomRef.current = z; setZoom(z)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pair])
+  // hysteresis: only re-target when the displayed scene leaves the comfort band
+  useEffect(() => {
+    const refB = pixelBox(pair.reference, basePx * zoomRef.current)
+    const others = [pixelBox(pair.target, basePx * zoomRef.current * ratio)]
+    if (revealed) others.push(pixelBox(pair.target, basePx * zoomRef.current * pair.ratio))
+    const adj = zoomAdjust(fillFraction(refB, others, space))
+    if (adj !== 1) zoomTarget.current = Math.max(CAMERA.minRefPx / basePx, zoomRef.current * adj)
+  }, [ratio, revealed, pair, basePx, space])
+  // ease toward the target
+  useEffect(() => {
+    let raf = 0
+    const tick = () => {
+      const z = zoomRef.current, t = zoomTarget.current
+      if (Math.abs(t - z) > 1e-3) { const n = z + (t - z) * CAMERA.ease; zoomRef.current = n; setZoom(n) }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [])
+  const refPx = basePx * zoom
+  const cellPx = gridCellPx(zoom)
 
   // ── timer ──
   const [tLeft, setTLeft] = useState(cfg.roundSeconds)
@@ -138,7 +179,7 @@ export function PlayScreen({ run, onLock, onNext, showHint, onHintDone }: Props)
         <div className="absolute left-0 right-0 top-0 h-[5px] bg-amber/25 z-10">
           <div className="h-full bg-amber transition-[width] duration-75" style={{ width: `${revealed ? 0 : timerPct}%`, background: tLeft < 3 && !revealed ? 'var(--coral)' : undefined }} />
         </div>
-        <div ref={gridRef} className="grid-map absolute inset-0 touch-none cursor-ns-resize"
+        <div ref={gridRef} className="grid-map absolute inset-0 touch-none cursor-ns-resize" style={{ backgroundSize: `${cellPx}px ${cellPx}px` }}
           onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onWheel={onWheel}>
           {/* ground line */}
           <div className="absolute left-3 right-3 h-[2px]" style={{ top: groundY, background: 'var(--ground)' }} />
@@ -169,7 +210,7 @@ export function PlayScreen({ run, onLock, onNext, showHint, onHintDone }: Props)
             <DimensionLine axis={pair.target.axis} x={tgtCX + trueBox.w / 2 + 12} y={groundY} w={trueBox.w} h={trueBox.h} label={formatSize(pair.target.size_m)} cx={tgtCX} />
           </>}
           <div className="absolute -translate-x-1/2 bg-coral text-white text-[13px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
-            style={{ left: tgtCX, top: groundY + 8 }}>
+            style={{ left: tgtCX, top: groundY - Math.max(tgtBox.h, revealed ? trueBox.h : 0) - 30 }}>
             {pair.target.name}
           </div>
 
