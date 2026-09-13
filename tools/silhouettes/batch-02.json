@@ -1,0 +1,8 @@
+[
+  { "id": "vw-golf-b", "subject": "a generic compact five-door hatchback car", "view": "side view",
+    "extra": "accurate real-world proportions, the car is about three times longer than it is tall, wheels on the ground line, wide-angle-free flat elevation drawing" },
+  { "id": "shipping-container-b", "subject": "a standard forty-foot steel shipping container seen from its long side", "view": "side view",
+    "extra": "accurate real-world proportions, the container is almost five times longer than it is tall, long low rectangle with corrugated sides, flat elevation drawing" },
+  { "id": "boeing-747-b", "subject": "a large four-engine wide-body passenger jet airliner with a humped upper deck, landing gear retracted, nose pointing left", "view": "side view",
+    "extra": "flat elevation drawing, fuselage horizontal, all four engines visible under the wing" }
+]

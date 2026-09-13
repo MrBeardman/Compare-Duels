@@ -1,0 +1,12 @@
+[
+  { "id": "chair",            "subject": "a simple wooden dining chair", "view": "side view" },
+  { "id": "coffee-mug",       "subject": "a ceramic coffee mug with a handle on the right", "view": "side view" },
+  { "id": "wine-bottle",      "subject": "a standard wine bottle standing upright", "view": "side view" },
+  { "id": "banana",           "subject": "a single banana lying horizontally, curve facing up", "view": "side view" },
+  { "id": "coke-can",         "subject": "a plain aluminium beverage can standing upright, no label", "view": "side view" },
+  { "id": "bicycle",          "subject": "a classic city bicycle", "view": "side view" },
+  { "id": "vw-golf",          "subject": "a generic compact five-door hatchback car", "view": "side view" },
+  { "id": "boeing-747",       "subject": "a large four-engine wide-body passenger jet airliner with a humped upper deck, landing gear retracted", "view": "side view" },
+  { "id": "street-lamp",      "subject": "a tall city street lamp post with a single curved arm and lantern", "view": "side view" },
+  { "id": "shipping-container","subject": "a standard forty-foot steel shipping container", "view": "side view" }
+]

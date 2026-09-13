@@ -1,0 +1,8 @@
+{
+  "_comment": "True [width_m, height_m] of the drawn view. When both real dimensions are known, build-silhouettes.mjs overrides the traced aspect with the real one (the renderer stretches via preserveAspectRatio=none). Generated silhouettes are usually drawn a bit too tall; this corrects that.",
+  "vw-golf": [4.284, 1.456],
+  "boeing-747": [70.66, 19.41],
+  "shipping-container": [12.19, 2.59],
+  "coke-can": [0.066, 0.115],
+  "wine-bottle": [0.075, 0.30]
+}

@@ -1,0 +1,6 @@
+[
+  { "id": "vw-golf-c", "subject": "a generic compact five-door hatchback car", "view": "side elevation blueprint drawing",
+    "extra": "pure 2D orthographic projection exactly perpendicular to the car's side, both wheels perfectly round and aligned on one baseline, no perspective, no visible front or rear face, automotive design blueprint style, solid dark fill" },
+  { "id": "chair-c", "subject": "a simple wooden dining chair", "view": "side elevation blueprint drawing",
+    "extra": "pure 2D orthographic projection, no perspective, furniture design drawing style, solid dark fill" }
+]

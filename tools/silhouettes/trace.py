@@ -17,21 +17,13 @@ g = np.asarray(bg.convert('L').filter(ImageFilter.GaussianBlur(0.8)))
 mask = g < thr                                   # object = darker than near-white
 
 # keep only the largest connected component (drops stray specks)
-from collections import deque
-h, w = mask.shape; seen = np.zeros_like(mask, bool); best = None
-for y in range(h):
-    for x in range(w):
-        if mask[y, x] and not seen[y, x]:
-            comp = []; dq = deque([(y, x)]); seen[y, x] = True
-            while dq:
-                cy, cx = dq.popleft(); comp.append((cy, cx))
-                for ny, nx in ((cy-1,cx),(cy+1,cx),(cy,cx-1),(cy,cx+1)):
-                    if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not seen[ny, nx]:
-                        seen[ny, nx] = True; dq.append((ny, nx))
-            if best is None or len(comp) > len(best): best = comp
-clean = np.zeros_like(mask)
-ys, xs = zip(*best); clean[list(ys), list(xs)] = True
-y0, y1, x0, x1 = min(ys), max(ys) + 1, min(xs), max(xs) + 1
+from scipy import ndimage
+labels, n = ndimage.label(mask)
+if n == 0: sys.exit("empty mask")
+sizes = ndimage.sum(mask, labels, range(1, n + 1))
+clean = labels == (int(np.argmax(sizes)) + 1)
+ys, xs = np.where(clean)
+y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
 crop = clean[y0:y1, x0:x1]
 
 # Shadow trim: generated renders often leave a thin contact shadow under the object. In the bottom
