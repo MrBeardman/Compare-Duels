@@ -7,14 +7,26 @@ interface Props {
   onDaily: () => void
   dailyStreak: number
   bestAccuracy: number | null
+  hasChallenge: boolean
+  onChallenge: () => void
+  onLadder: () => void
+  onStats: () => void
+  darkMode: boolean
+  onToggleDark: () => void
 }
 
-export function Home({ category, onCategory, onPlay, onDaily, dailyStreak, bestAccuracy }: Props) {
+export function Home({ category, onCategory, onPlay, onDaily, dailyStreak, bestAccuracy, hasChallenge, onChallenge, onLadder, onStats, darkMode, onToggleDark }: Props) {
   const chips: { id: Category | 'all'; label: string }[] = [...CATEGORIES, { id: 'all', label: 'All' }]
   return (
     <div className="h-full flex flex-col px-5 pt-8 pb-6 gap-6 max-w-[520px] mx-auto w-full">
       <div className="text-center">
-        <div className="text-[40px] leading-none font-bold tracking-tight">COMPARE DUELS</div>
+        <div className="flex items-start justify-center gap-2">
+          <div className="text-[30px] leading-none font-bold tracking-tight whitespace-nowrap">COMPARE DUELS</div>
+          <button aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'} onClick={onToggleDark}
+            className="shrink-0 w-8 h-8 rounded-full border-2 border-[var(--card-border)] bg-paper-2 grid place-items-center text-[14px] -mt-0.5">
+            {darkMode ? '☀' : '☾'}
+          </button>
+        </div>
         <div className="text-muted mt-2">How big is it, really?</div>
       </div>
 
@@ -31,17 +43,17 @@ export function Home({ category, onCategory, onPlay, onDaily, dailyStreak, bestA
 
       <div className="grid grid-cols-2 gap-3">
         <Tile title="Daily" sub={dailyStreak > 0 ? `${dailyStreak} day streak` : 'Same 5 for everyone'} onClick={onDaily} />
-        <Tile title="Challenge" sub="Coming soon" disabled />
-        <Tile title="Ladder" sub="Coming soon" disabled />
-        <Tile title="Stats" sub={bestAccuracy != null ? `Best run: ${bestAccuracy}` : 'Play a run first'} disabled />
+        <Tile title="Challenge" sub={hasChallenge ? "You've been challenged" : 'Finish a run to get a link'} onClick={hasChallenge ? onChallenge : undefined} disabled={!hasChallenge} highlight={hasChallenge} />
+        <Tile title="Ladder" sub="Your rank" onClick={onLadder} />
+        <Tile title="Stats" sub={bestAccuracy != null ? `Best run: ${bestAccuracy}` : 'Play a run first'} onClick={onStats} />
       </div>
     </div>
   )
 }
 
-function Tile({ title, sub, onClick, disabled }: { title: string; sub: string; onClick?: () => void; disabled?: boolean }) {
+function Tile({ title, sub, onClick, disabled, highlight }: { title: string; sub: string; onClick?: () => void; disabled?: boolean; highlight?: boolean }) {
   return (
-    <button onClick={onClick} disabled={disabled} className="card p-4 text-left disabled:opacity-50">
+    <button onClick={onClick} disabled={disabled} className={`card p-4 text-left disabled:opacity-50 ${highlight ? 'ring-2 ring-coral' : ''}`}>
       <div className="font-bold text-[16px]">{title}</div>
       <div className="text-muted text-[13px] mt-0.5">{sub}</div>
     </button>

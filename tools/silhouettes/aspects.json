@@ -1,8 +1,21 @@
 {
-  "_comment": "True [width_m, height_m] of the drawn view. When both real dimensions are known, build-silhouettes.mjs overrides the traced aspect with the real one (the renderer stretches via preserveAspectRatio=none). Generated silhouettes are usually drawn a bit too tall; this corrects that.",
+  "_comment": "True [width_m, height_m] of the drawn view. When both real dimensions are known, build-silhouettes.mjs overrides the traced aspect with the real one (the renderer stretches via preserveAspectRatio=none). Generated silhouettes are usually drawn a bit too tall (or, occasionally, in the wrong orientation entirely); this corrects both. Second dimension is a reasonable real-world estimate where the pool only tracks one axis.",
   "vw-golf": [4.284, 1.456],
   "boeing-747": [70.66, 19.41],
   "shipping-container": [12.19, 2.59],
   "coke-can": [0.066, 0.115],
-  "wine-bottle": [0.075, 0.30]
+  "wine-bottle": [0.075, 0.30],
+  "credit-card": [0.0856, 0.054],
+  "violin": [0.6, 0.21],
+  "city-bus": [12, 3.1],
+  "semi-truck": [16.5, 4.0],
+  "pickup-truck": [5.9, 1.95],
+  "motorcycle": [2.1, 1.15],
+  "tram": [30, 3.4],
+  "train-car": [26, 4.0],
+  "boeing-737": [39.5, 12.5],
+  "airbus-a380": [72.7, 24.1],
+  "cessna-172": [8.28, 2.72],
+  "helicopter": [12, 3.15],
+  "space-shuttle": [37, 17.86]
 }

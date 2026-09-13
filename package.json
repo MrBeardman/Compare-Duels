@@ -11,6 +11,8 @@
     "lint": "oxlint",
     "build:pool": "node scripts/build-pool.mjs",
     "shots": "node scripts/shots.mjs",
+    "e2e": "node scripts/e2e.mjs",
+    "review": "node scripts/review.mjs",
     "predev": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",
     "prebuild": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",
     "pretest": "node scripts/build-pool.mjs && node scripts/build-silhouettes.mjs",

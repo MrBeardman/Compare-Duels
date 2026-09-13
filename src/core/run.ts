@@ -10,8 +10,8 @@ export interface Run {
   used: Set<string>
 }
 
-export function createRun(pool: SizeObject[], seed: number, mode: RunMode, category: Category | 'all' = 'all'): Run {
-  const config: RunConfig = { ...DEFAULT_CONFIG, seed, mode, category }
+export function createRun(pool: SizeObject[], seed: number, mode: RunMode, category: Category | 'all' = 'all', overrides: Partial<RunConfig> = {}): Run {
+  const config: RunConfig = { ...DEFAULT_CONFIG, seed, mode, category, ...overrides }
   return {
     pool,
     rng: mulberry32(seed),
@@ -54,7 +54,10 @@ export function submitGuess(run: Run, guessRatio: number, timedOut = false): Run
     index: s.roundIndex, pair, guessRatio, guessSize, accuracy: acc, band: b, points: pts,
     percentOff: percentOff(guessSize, truth), timedOut,
   }
-  const livesLeft = b === 'miss' ? s.livesLeft - 1 : s.livesLeft
+  // Ghost duel: lives never matter (both players see the same rounds); it ends when the last shared round is played.
+  const isGhost = s.config.mode === 'ghost'
+  const ghostDone = isGhost && s.roundIndex + 1 >= (s.config.ghostGuesses?.length ?? Infinity)
+  const livesLeft = isGhost ? s.livesLeft : (b === 'miss' ? s.livesLeft - 1 : s.livesLeft)
   return {
     ...run,
     state: {
@@ -64,7 +67,7 @@ export function submitGuess(run: Run, guessRatio: number, timedOut = false): Run
       streak,
       bestStreak: Math.max(s.bestStreak, streak),
       livesLeft,
-      phase: livesLeft <= 0 ? 'over' : 'reveal',
+      phase: (livesLeft <= 0 || ghostDone) ? 'over' : 'reveal',
     },
   }
 }
@@ -88,4 +91,13 @@ export function averageAccuracy(results: RoundResult[]): number {
 /** Everything needed to replay a run as a ghost: seed + guesses. ~100 bytes. */
 export function ghostOf(run: Run): { seed: number; category: Category | 'all'; guesses: number[] } {
   return { seed: run.state.config.seed, category: run.state.config.category, guesses: run.state.results.map(r => +r.guessRatio.toFixed(4)) }
+}
+
+/** Recomputes what the ghost would have scored on a round already played in this run, for the duel comparison. */
+export function ghostAccuracyAt(run: Run, roundIndex: number): number | null {
+  const guesses = run.state.config.ghostGuesses
+  const result = run.state.results[roundIndex]
+  if (!guesses || !result || guesses[roundIndex] == null) return null
+  const guessSize = guesses[roundIndex] * result.pair.reference.size_m
+  return accuracy(guessSize, result.pair.target.size_m)
 }

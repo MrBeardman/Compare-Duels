@@ -163,8 +163,9 @@ export function PlayScreen({ run, onLock, onNext, showHint, onHintDone }: Props)
       {/* HUD */}
       <div className="flex items-center justify-between text-[15px]">
         <div className="flex items-center gap-3">
-          <span className="font-bold">Round {s.roundIndex + 1}</span>
-          <Hearts total={cfg.lives} left={s.livesLeft} />
+          {cfg.mode === 'ghost'
+            ? <span className="font-bold mono">Round {s.roundIndex + 1}/{cfg.ghostGuesses?.length ?? '?'}</span>
+            : <><span className="font-bold">Round {s.roundIndex + 1}</span><Hearts total={cfg.lives} left={s.livesLeft} /></>}
         </div>
         <div className="mono text-[15px]"><b>{formatPoints(s.points)}</b>{s.streak > 0 && <span className="text-coral ml-2">x{s.streak}</span>}</div>
       </div>

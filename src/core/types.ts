@@ -52,6 +52,8 @@ export interface RunConfig {
   /** Fixed max target/reference ratio the renderer always reserves room for. Pairs never exceed it. */
   maxRatio: number
   minRatio: number
+  /** Ghost mode only: the opponent's guess ratios, one per round. The run ends after the last one, lives permitting. */
+  ghostGuesses?: number[]
 }
 
 export interface RunState {

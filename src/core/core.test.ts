@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest'
 import fs from 'node:fs'
 import { accuracy, band, roundPoints, percentOff } from './scoring'
 import { mulberry32, hashSeed } from './rng'
-import { createRun, startRound, submitGuess, nextRound, averageAccuracy, ghostOf } from './run'
+import { createRun, startRound, submitGuess, nextRound, averageAccuracy, ghostOf, ghostAccuracyAt } from './run'
 import { maxTierFor, ratioWindow, pickPair } from './pairs'
 import type { SizeObject, RunConfig } from './types'
 import { DEFAULT_CONFIG } from './types'
+import { rankFor, weekKey } from './rank'
 
 const pool: SizeObject[] = JSON.parse(fs.readFileSync('public/data/pool.json', 'utf8'))
 
@@ -126,5 +127,34 @@ describe('run', () => {
     let run = startRound(createRun(pool, 5, 'endless'))
     run = submitGuess(run, run.state.current!.startRatio, true)
     expect(run.state.results[0].timedOut).toBe(true)
+  })
+  it('ghost duel replays the same pairs and ends by round count, not lives', () => {
+    let original = startRound(createRun(pool, 42, 'endless'))
+    for (let i = 0; i < 5; i++) { original = submitGuess(original, original.state.current!.ratio * 1.15); original = nextRound(original) }
+    const g = ghostOf(original)
+    let duel = startRound(createRun(pool, g.seed, 'ghost', g.category, { lives: g.guesses.length + 1, ghostGuesses: g.guesses }))
+    expect(duel.state.current!.target.id).toBe(original.state.results[0].pair.target.id)
+    for (let i = 0; i < g.guesses.length; i++) {
+      // always miss badly: lives must not end the duel early
+      duel = submitGuess(duel, duel.state.current!.ratio * 8)
+      expect(ghostAccuracyAt(duel, i)).toBe(original.state.results[i].accuracy)
+      if (duel.state.phase === 'reveal') duel = nextRound(duel)
+    }
+    expect(duel.state.phase).toBe('over')
+    expect(duel.state.results.length).toBe(g.guesses.length)
+  })
+})
+
+describe('rank', () => {
+  it('levels up as points accumulate, and level 1 starts at 0', () => {
+    expect(rankFor(0).level).toBe(1)
+    expect(rankFor(0).tier).toBe('bronze')
+    const hi = rankFor(50000)
+    expect(hi.level).toBeGreaterThan(5)
+    expect(hi.xpInLevel).toBeGreaterThanOrEqual(0)
+    expect(hi.xpInLevel).toBeLessThan(hi.xpForLevel)
+  })
+  it('week key is stable within the same ISO week', () => {
+    expect(weekKey(new Date('2026-09-14T10:00:00Z'))).toBe(weekKey(new Date('2026-09-16T23:00:00Z')))
   })
 })
